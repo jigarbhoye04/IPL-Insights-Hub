@@ -131,6 +131,10 @@ def show_er_diagram():
 def operations():
     return render_template('operations.html')
 
+@app.route('/sample_queries')
+def sample_queries():
+    return render_template('sample.html')
+
 admin_cred={
     'username': 'admin',
     'password': '1234admin'
