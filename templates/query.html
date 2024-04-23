@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Query</title>
+    <!-- Import Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap">
+    <!-- Include Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bodymain {
+            background-color: #222831;
+            font-family: 'Ubuntu', sans-serif;
+            width: 100%;
+            padding-top: 100px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            background-color: #FCDEC0;
+        }
+
+        #results {
+            padding-bottom: 50px;
+            margin-bottom: 50px;
+        }
+
+        /* #results {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        } */
+
+    </style>
+</head>
+
+<body class="bodymain font-ubuntu">
+    <header class="bg-gray-900 text-white py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl">Admin Panel</h1>
+            <div>
+                <a href="{{ url_for('show_er_diagram') }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Show ER Diagram</a>
+                <a href="{{ url_for('admin_logout') }}"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-4">Logout</a>
+            </div>
+        </div>
+    </header>
+    <div class="container mx-auto">
+        <h2 class="text-3xl font-bold text-white mb-8 text-center">Enter Your SQL Query</h2>
+        <form id="query" action="{{ url_for('query') }}" method="post" class="mb-8">
+            <textarea name="query" id="query-input" rows="5" required
+                class="w-full p-4 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 text-gray-800 placeholder-gray-600 placeholder-opacity-50"></textarea><br />
+            <button type="submit"
+                class="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300">Submit</button>
+        </form>
+
+        <div id="results" class="hidden bg-white bg-opacity-90 p-4 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-center">Query Results</h2>
+            <div id="output" class="text-gray-800 result-container"></div>
+        </div>
+    </div>
+
+
+    <footer class="text-black py-4 mt-8">
+        <div class="container mx-auto text-center">
+            <p>22BCE041</p>
+            <p>JIGAR BHOYE</p>
+            <!-- <p>&copy; 2024</p> -->
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        const queryForm = document.getElementById("query");
+        const resultsDiv = document.getElementById("results");
+        const outputDiv = document.getElementById("output");
+
+        queryForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const query = document.querySelector('textarea[name="query"]').value;
+
+            try {
+                const response = await fetch("/query", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        query: query,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    outputDiv.innerHTML = `<p class="text-red-600">${data.error}</p>`;
+                } else {
+                    displayResults(data.result);
+                    resultsDiv.style.display = "block"; // Show the results section
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `<p class="text-red-600">An error occurred: ${error}</p>`;
+            }
+        });
+
+        function displayResults(results) {
+            if (results.length === 0) {
+                outputDiv.innerHTML = "<p class='text-gray-600'>No results found.</p>";
+                return;
+            }
+
+            const table = document.createElement("table");
+            table.classList.add(
+                "w-full",
+                "mt-8",
+                "border",
+                "border-gray-300",
+                "rounded-lg",
+                "overflow-hidden",
+                "shadow-md"
+            );
+
+            const headerRow = table.insertRow();
+            Object.keys(results[0]).forEach((column) => {
+                const th = document.createElement("th");
+                th.textContent = column;
+                th.classList.add("bg-gray-100", "py-2", "px-4", "text-left");
+                headerRow.appendChild(th);
+            });
+
+            results.forEach((row) => {
+                const dataRow = table.insertRow();
+                Object.entries(row).forEach(([key, value]) => {
+                    const td = dataRow.insertCell();
+                    td.textContent = value;
+                    td.classList.add(
+                        "py-2",
+                        "px-4",
+                        "border-b",
+                        "border-gray-300"
+                    );
+                });
+            });
+
+            outputDiv.innerHTML = ""; // Clear previous results
+            outputDiv.appendChild(table);
+        }
+    </script>
+</body>
+
+</html>

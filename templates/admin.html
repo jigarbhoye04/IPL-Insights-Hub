@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            font-family: "Ubuntu", sans-serif;
+        }
+        
+        header{
+            position: fixed;
+            top: 0;
+            width: 100%;
+
+        }
+
+        .fquery {
+            padding-top: 200px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <header class="bg-gray-900 text-white py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl">Admin Panel</h1>
+            <div>
+                <a href="{{ url_for('show_er_diagram') }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Show ER Diagram</a>
+                <a href="{{ url_for('admin_logout') }}"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-4">Logout</a>
+            </div>
+        </div>
+    </header>
+    <div class="container mx-auto py-12 px-4 fquery">
+        <h2 class="text-3xl font-bold text-center mb-6">Welcome, Admin!</h2>
+        <p class="text-lg text-center mb-8">
+            This is the admin panel. You can perform DML operations here by
+            firing specific queries.
+        </p>
+        <a href="{{ url_for('user_query_page') }}"
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Perform a Query</a>
+
+        <!-- <div class="form-container mx-auto">
+            <h2 class="text-3xl">Select Table to Perform DML Operations</h2>
+            <form action="{{ url_for('admin_page') }}" method="post" id="select-table-form">
+                <label for="table" class="block text-gray-700 text-sm font-bold mb-2">Select Table:</label>
+                <select name="table" id="table"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    {% for table in tables %}
+                    <option value="{{ table }}">{{ table|upper }}</option>
+                    {% endfor %}
+                </select>
+                <div class="flex justify-center mt-4">
+                    <input type="submit" value="Select Table"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300" />
+                </div>
+            </form>
+        </div> -->
+
+        {% if request.form.table %}
+        <div class="mt-8">
+            <h3 class="text-2xl font-bold mb-4">
+                Selected Table: {{ request.form.table|upper }}
+            </h3>
+
+            <!-- Result Data Section -->
+            <div id="result-data" class="hidden mt-8">
+                <h3 class="text-2xl font-bold mb-4">Result Data</h3>
+                <div id="result-content" class="bg-white p-4 rounded-md"></div>
+            </div>
+
+            <!-- Create Form -->
+            <form method="post" class="mb-6" id="create-form">
+                <input type="hidden" name="table" value="{{ request.form.table }}" />
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {% for column in schema %} {% if column[3] != 'PRI' %}
+                    <div class="mb-4">
+                        <label for="{{ column[0] }}" class="block text-gray-700 text-sm font-bold mb-2">{{ column[0]
+                            }}</label>
+                        <input type="text" name="{{ column[0] }}"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    </div>
+                    {% endif %} {% endfor %}
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" name="create"
+                        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+                        Create new data
+                    </button>
+                </div>
+            </form>
+
+            <!-- Update Form -->
+            <form method="post" class="mb-6" id="update-form">
+                <input type="hidden" name="table" value="{{ request.form.table }}" />
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="mb-4">
+                        <label for="primary_key" class="block text-gray-700 text-sm font-bold mb-2">Primary Key:</label>
+                        <input type="text" name="primary_key"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    </div>
+                    {% for column in schema %} {% if column[3] != 'PRI' %}
+                    <div class="mb-4">
+                        <label for="{{ column[0] }}" class="block text-gray-700 text-sm font-bold mb-2">{{ column[0]
+                            }}</label>
+                        <input type="text" name="{{ column[0] }}"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    </div>
+                    {% endif %} {% endfor %}
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" name="update"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                        Update Data
+                    </button>
+                </div>
+            </form>
+
+            <!-- Delete Form -->
+            <form method="post" id="delete-form">
+                <input type="hidden" name="table" value="{{ request.form.table }}" />
+                <div class="mb-4">
+                    <label for="primary_key" class="block text-gray-700 text-sm font-bold mb-2">Primary Key:</label>
+                    <input type="text" name="primary_key"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" name="delete"
+                        class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">
+                        Delete Data
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="bg-blue-900 text-white py-4 mt-8">
+        <div class="container mx-auto text-center">
+            <p>22BCE041</p>
+            <p>JIGAR BHOYE</p>
+            <p>&copy; 2024</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            async function displayResultData() {
+                const table = document.querySelector(
+                    'select[name="table"]'
+                ).value;
+                const formData = new FormData();
+                formData.append("table", table);
+
+                try {
+                    const response = await fetch("/get_result_data", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch data");
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        document.getElementById(
+                            "result-content"
+                        ).innerHTML = `<p class="text-red-500">${data.error}</p>`;
+                    } else {
+                        // Display the result data in a table or other format
+                        let resultHtml =
+                            '<table class="border-collapse border border-gray-400">';
+                        resultHtml += "<thead><tr>";
+                        for (const key in data.result[0]) {
+                            resultHtml += `<th class="border border-gray-400">${key}</th>`;
+                        }
+                        resultHtml += "</tr></thead><tbody>";
+                        data.result.forEach((row) => {
+                            resultHtml += "<tr>";
+                            for (const key in row) {
+                                resultHtml += `<td class="border border-gray-400">${row[key]}</td>`;
+                            }
+                            resultHtml += "</tr>";
+                        });
+                        resultHtml += "</tbody></table>";
+                        document.getElementById("result-content").innerHTML =
+                            resultHtml;
+                    }
+
+                    document
+                        .getElementById("result-data")
+                        .classList.remove("hidden");
+                } catch (error) {
+                    console.error("Error:", error);
+                    document.getElementById(
+                        "result-content"
+                    ).innerHTML = `<p class="text-red-500">An error occurred while fetching data</p>`;
+                }
+            }
+
+            // Add event listener to the form for selecting table
+            document
+                .getElementById("select-table-form")
+                .addEventListener("submit", async function (event) {
+                    event.preventDefault(); // Prevent default form submission
+                    await displayResultData(); // Call function to fetch and display result data
+
+                    // Show the Create, Update, and Delete forms
+                    document.getElementById("create-form").style.display =
+                        "block";
+                    document.getElementById("update-form").style.display =
+                        "block";
+                    document.getElementById("delete-form").style.display =
+                        "block";
+                });
+
+            // Add event listeners to DML form submit buttons
+            document
+                .getElementById("create-form")
+                .addEventListener("submit", handleFormSubmit);
+            document
+                .getElementById("update-form")
+                .addEventListener("submit", handleFormSubmit);
+            document
+                .getElementById("delete-form")
+                .addEventListener("submit", handleFormSubmit);
+
+            function handleFormSubmit(event) {
+                event.preventDefault(); // Prevent default form submission
+                const formData = new FormData(this);
+                fetch(this.action, {
+                    method: this.method,
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Failed to perform operation");
+                        }
+                        return response.text();
+                    })
+                    .then(() => {
+                        displayResultData(); // Display result data after DML operation
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        document.getElementById(
+                            "result-content"
+                        ).innerHTML = `<p class="text-red-500">${error}</p>`;
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>

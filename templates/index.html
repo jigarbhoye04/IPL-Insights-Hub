@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MySQL Data</title>
+</head>
+<body>
+    <h1>Data from MySQL Database</h1>
+    <form action="/" method="post">
+        <label for="table">Select Table:</label>
+        <select name="table" id="table">
+            <option value="table1">Table 1</option>
+            <option value="table2">Table 2</option>
+            <!-- Add options for other tables -->
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    
+    <form action="/insert" method="post">
+        <!-- Add input fields for new data -->
+        <input type="text" name="field1" placeholder="Field 1">
+        <input type="text" name="field2" placeholder="Field 2">
+        <!-- Add more input fields if needed -->
+        <button type="submit">Insert</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <!-- Add more table headers if needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <!-- Access other columns similarly -->
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <form action="/update" method="post">
+        <!-- Add input fields for updated data -->
+        <input type="text" name="field1" placeholder="Field 1">
+        <input type="text" name="field2" placeholder="Field 2">
+        <!-- Add more input fields if needed -->
+        <button type="submit">Update</button>
+    </form>
+
+    <form action="/delete" method="post">
+        <input type="text" name="id_to_delete" placeholder="ID to Delete">
+        <button type="submit">Delete</button>
+    </form>
+    
+</body>
+</html>

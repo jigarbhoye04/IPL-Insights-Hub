@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Page</title>
+    <!-- Include Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            font-family: "Ubuntu", sans-serif;
+        }
+        
+        /* Custom styles */
+        .form-container {
+            width: 45%;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container form {
+            text-align: center;
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .form-container select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-container button {
+            width: calc(100% - 2px);
+            /* Adjust button width to match select field */
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .main_content{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            background-color: #074173;
+        }
+
+        footer{
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            background-color: #FCDEC0;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <header class="bg-gray-900 text-white py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl">Player Insights</h1>
+            <div>
+                <!-- <a href="{{ url_for('user_query_page') }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Perform a Query</a> -->
+                <a href="{{ url_for('show_er_diagram') }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Show ER Diagram</a>
+                <!-- Admin Login Button -->
+                <a href="{{ url_for('admin_login') }}"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-4">Admin Login</a>
+            </div>
+        </div>
+    </header>
+    <div class="main_content">
+        <div class="container mx-auto flex justify-center main_cont">
+            <div class="form-container m-5">
+                <h2 class="text-3xl">Select Table to See Content</h2>
+                <form action="/" method="post">
+                    <label for="table">Select Table:</label>
+                    <select name="table" id="table">
+                        {% for table in tables %}
+                        <option value="{{ table }}">{{ table|upper }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <footer class="bg-gray-900 text-white py-4 mt-8">
+        <div class="container mx-auto text-center">
+            <!-- <h3>Footer</h3> -->
+            <p>22BCE041</p>
+            <p>JIGAR BHOYE</p>
+        </div>
+    </footer>
+    <!-- JavaScript to capitalize table names in the dropdown -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tableSelects = document.querySelectorAll(
+                'select[name="table"], select[name="crud_table"]' // Select both dropdowns
+            );
+            tableSelects.forEach(function (select) {
+                select.addEventListener("change", function () {
+                    const selectedOption = this.querySelector("option:checked");
+                    if (selectedOption) {
+                        selectedOption.textContent =
+                            selectedOption.textContent.toUpperCase();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
